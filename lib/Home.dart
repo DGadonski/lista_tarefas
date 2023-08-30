@@ -16,33 +16,68 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   List listaTarefas= [];
+  TextEditingController controllerTarefa = TextEditingController();
 
-  getDiretorio() async {
+  Future<File> getDiretorio() async {
     //Recuperar diretorio.
     final diretorio = await getApplicationDocumentsDirectory();
+    print(diretorio.path);
     return File('${diretorio.path}/dados.json');
   }
-  
+
   salvarArquivo() async {
 
-    var arquivo = getDiretorio();    
+    var arquivo = await getDiretorio();  
+    var dados = jsonEncode(listaTarefas);
+    arquivo.writeAsString(dados);    
+
+  }
+
+  salvarTarefa(){
+
+    var textodigitado = controllerTarefa.text;
 
     //Criar dados.
     Map<String, dynamic> tarefa = Map();
-    tarefa['titulo'] = 'Ir ao mercado';
+    tarefa['titulo'] = textodigitado;
     tarefa['realizada'] = false;
-    listaTarefas.add(tarefa);
 
-    String dados = jsonEncode(listaTarefas);
+    setState(() {
+    listaTarefas.add(tarefa);      
+    });
 
-    arquivo.writeAsString(dados);
+    salvarArquivo();
+    controllerTarefa.text = '';
+  }
 
+  lerArquivo() async {
+
+    try{
+
+    var arquivo = await getDiretorio();
+    return arquivo.readAsString();
+
+    }catch(e){
+      return null;
+    }    
+
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    lerArquivo().then((dados){
+      setState(() {
+        listaTarefas = jsonDecode(dados);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
 
-    salvarArquivo();
+    // salvarArquivo();
+    // print(listaTarefas.toString());
 
     return Scaffold(
       appBar: AppBar(title: Text('ListaTarefas de tarefas'),
@@ -50,9 +85,21 @@ class _HomeState extends State<Home> {
       body: ListView.builder(
         itemCount: listaTarefas.length,
         itemBuilder: (context, index) {
-          return ListTile(
+          return CheckboxListTile(
             title: Text(listaTarefas[index]['titulo']),
-            );
+            value: listaTarefas[index]['realizada'], 
+            onChanged: (valorAlterado){
+              setState(() {
+              listaTarefas[index]['realizada']=valorAlterado;                
+              });
+
+              salvarArquivo();
+
+            });
+
+          // return ListTile(
+          //   title: 
+          //   );
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -66,6 +113,7 @@ class _HomeState extends State<Home> {
               return AlertDialog(
                 title: Text('Adicionar Tarefa'),
                 content: TextField(
+                  controller: controllerTarefa,
                   decoration: InputDecoration(
                     labelText: 'Digite sua tarefa'
                   ),
@@ -80,7 +128,7 @@ class _HomeState extends State<Home> {
                   ElevatedButton(
                     onPressed: (){
                       //salvar
-
+                      salvarTarefa();
                       Navigator.pop(context);
                     }, 
                     child: Text('Salvar')),
