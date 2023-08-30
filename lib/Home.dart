@@ -15,13 +15,17 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-
   List listaTarefas= [];
 
-  salvarArquivo() async {
+  getDiretorio() async {
     //Recuperar diretorio.
     final diretorio = await getApplicationDocumentsDirectory();
-    var arquivo = File('${diretorio.path}/dados.json');
+    return File('${diretorio.path}/dados.json');
+  }
+  
+  salvarArquivo() async {
+
+    var arquivo = getDiretorio();    
 
     //Criar dados.
     Map<String, dynamic> tarefa = Map();
@@ -47,7 +51,7 @@ class _HomeState extends State<Home> {
         itemCount: listaTarefas.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(listaTarefas[index]),
+            title: Text(listaTarefas[index]['titulo']),
             );
         },
       ),
