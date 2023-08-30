@@ -1,6 +1,10 @@
-// ignore_for_file: prefer_const_constructors, file_names
+// ignore_for_file: prefer_const_constructors, file_names, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:async';
+import 'dart:convert';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,19 +15,39 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  List<String> lista = ['Ir ao mercado', 'Estudar', 'Teste'];
-  bool? valor1 = false;
+
+  List listaTarefas= [];
+
+  salvarArquivo() async {
+    //Recuperar diretorio.
+    final diretorio = await getApplicationDocumentsDirectory();
+    var arquivo = File('${diretorio.path}/dados.json');
+
+    //Criar dados.
+    Map<String, dynamic> tarefa = Map();
+    tarefa['titulo'] = 'Ir ao mercado';
+    tarefa['realizada'] = false;
+    listaTarefas.add(tarefa);
+
+    String dados = jsonEncode(listaTarefas);
+
+    arquivo.writeAsString(dados);
+
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    salvarArquivo();
+
     return Scaffold(
-      appBar: AppBar(title: Text('Lista de tarefas'),
+      appBar: AppBar(title: Text('ListaTarefas de tarefas'),
       backgroundColor: Colors.purple),
       body: ListView.builder(
-        itemCount: lista.length,
+        itemCount: listaTarefas.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(lista[index]),
+            title: Text(listaTarefas[index]),
             );
         },
       ),
