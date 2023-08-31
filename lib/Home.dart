@@ -17,6 +17,7 @@ class _HomeState extends State<Home> {
 
   List listaTarefas= [];
   TextEditingController controllerTarefa = TextEditingController();
+  Map<String, dynamic> tarefaExcluida = {};
 
   Future<File> getDiretorio() async {
     //Recuperar diretorio.
@@ -38,7 +39,7 @@ class _HomeState extends State<Home> {
     var textodigitado = controllerTarefa.text;
 
     //Criar dados.
-    Map<String, dynamic> tarefa = Map();
+    Map<String, dynamic> tarefa = {};
     tarefa['titulo'] = textodigitado;
     tarefa['realizada'] = false;
 
@@ -75,17 +76,51 @@ class _HomeState extends State<Home> {
 
   Widget criarItemLista(context, index){
 
-    return CheckboxListTile(
-            title: Text(listaTarefas[index]['titulo']),
-            value: listaTarefas[index]['realizada'], 
-            onChanged: (valorAlterado){
+    return Dismissible(
+      direction: DismissDirection.endToStart,
+      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+      onDismissed: (direction){
+
+        //Recuperar item decartado.
+        tarefaExcluida = listaTarefas[index];
+        listaTarefas.removeAt(index);
+        salvarArquivo();
+
+        final snackbar = SnackBar(
+          content: Text('Tarefa excluída'),
+          action: SnackBarAction(
+            label: 'Desfazer', 
+            onPressed: (){
               setState(() {
-              listaTarefas[index]['realizada']=valorAlterado;                
+              listaTarefas.insert(index, tarefaExcluida);                
               });
-
               salvarArquivo();
-
-            });
+            }),);
+        ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      } ,
+      background: Container(
+        padding: EdgeInsets.all(16),
+        color: Colors.red,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: const [
+            Icon(Icons.delete, 
+            color: Colors.white,)
+          ],
+        ),
+      ),
+      child: CheckboxListTile(
+              title: Text(listaTarefas[index]['titulo']),
+              value: listaTarefas[index]['realizada'], 
+              onChanged: (valorAlterado){
+                setState(() {
+                listaTarefas[index]['realizada']=valorAlterado;                
+                });
+    
+                salvarArquivo();
+    
+              }),
+    );
 
   }
 
