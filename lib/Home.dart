@@ -73,19 +73,9 @@ class _HomeState extends State<Home> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget criarItemLista(context, index){
 
-    // salvarArquivo();
-    // print(listaTarefas.toString());
-
-    return Scaffold(
-      appBar: AppBar(title: Text('ListaTarefas de tarefas'),
-      backgroundColor: Colors.purple),
-      body: ListView.builder(
-        itemCount: listaTarefas.length,
-        itemBuilder: (context, index) {
-          return CheckboxListTile(
+    return CheckboxListTile(
             title: Text(listaTarefas[index]['titulo']),
             value: listaTarefas[index]['realizada'], 
             onChanged: (valorAlterado){
@@ -97,10 +87,20 @@ class _HomeState extends State<Home> {
 
             });
 
-          // return ListTile(
-          //   title: 
-          //   );
-        },
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    // salvarArquivo();
+    // print(listaTarefas.toString());
+
+    return Scaffold(
+      appBar: AppBar(title: Text('ListaTarefas de tarefas'),
+      backgroundColor: Colors.purple),
+      body: ListView.builder(
+        itemCount: listaTarefas.length,
+        itemBuilder: criarItemLista
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.purple,
